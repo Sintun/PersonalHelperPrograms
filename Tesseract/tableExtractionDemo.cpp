@@ -49,7 +49,7 @@ public:
   }
   bool majorOverlap(const Rectangle& r) const
   {
-    Rectangle inter = intersection(r);
+    const Rectangle inter = intersection(r);
     if(inter.area() > 0.5f * std::min(area(), r.area()))
       return true;
     return false;
@@ -152,8 +152,6 @@ int main(int argc, char** argv)
     cla.data_path = "/usr/share/tesseract-ocr/4.00/tessdata/"; //ubuntu 18.04
   if( cla.lang.empty() )
     cla.lang = "eng";
-  
-  char *outText;
 
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
   
@@ -177,12 +175,13 @@ int main(int argc, char** argv)
   api->SetImage(image);
   
   /// Get OCR result
-  outText = api->GetUTF8Text();
+  std::unique_ptr<const char, void (*)(const char*)> outText(
+      api->GetUTF8Text(), [](const char* a) { delete[] a; });
   
   /// hold the program in order to inspect debug output
   std::cout<<"Tesseract recognition finished"<<std::endl<<std::endl;
   std::cout<<"Press any key to continue"<<std::endl; getchar();
-  printf("OCR output:\n%s", outText);
+  printf("OCR output:\n%s", outText.get());
   
   /// iterate over results
   std::unique_ptr<tesseract::ResultIterator> ri(api->GetIterator());
@@ -225,7 +224,6 @@ int main(int argc, char** argv)
   }
   
   api->End();
-  delete [] outText;
   pixDestroy(&image);
   delete api;
   return 0;

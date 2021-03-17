@@ -1,5 +1,5 @@
 # proc="$((`nproc`-"1"))"
-proc="6"
+proc="10"
 #TESSERACT
 #################################################################
 # can be commented out after a first build:
